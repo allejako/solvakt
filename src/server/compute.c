@@ -1,5 +1,6 @@
 #include "server/compute.h"
 
+#include <stdlib.h>
 #include <string.h>
 
 /* Priser under 25:e percentilen räknas som låga, över 75:e som höga. */
@@ -18,28 +19,31 @@ double compute_production_kwh(double radiation, const ComputeParams *params)
     return radiation * params->panel_area_m2 * params->panel_efficiency * SLOT_HOURS / 1000.0;
 }
 
-/* Priset vid en given percentil av alla priser i prognosen. */
-static double price_percentile(const Slot *slots, int count, double percentile)
+static int compare_double(const void *a, const void *b)
+{
+    double x = *(const double *)a;
+    double y = *(const double *)b;
+    return (x > y) - (x < y);
+}
+
+static int percentile_index(int count, double percentile)
+{
+    return (int)(percentile / 100.0 * (count - 1) + 0.5);
+}
+
+/* Gränserna för lågt och högt pris: 25:e och 75:e percentilen av alla
+ * priser i prognosen. Priserna sorteras en gång per plan. Den första
+ * versionen sorterade om dem för varje kvart, vilket profileringen visade
+ * tog i stort sett hela körtiden (se docs/PROFILING.md). */
+static void price_thresholds(const Slot *slots, int count, double *low, double *high)
 {
     double sorted[MAX_SLOTS];
     for (int i = 0; i < count; i++)
         sorted[i] = slots[i].price;
+    qsort(sorted, (size_t)count, sizeof(double), compare_double);
 
-    for (int i = 0; i < count - 1; i++)
-    {
-        for (int j = 0; j < count - 1 - i; j++)
-        {
-            if (sorted[j] > sorted[j + 1])
-            {
-                double tmp = sorted[j];
-                sorted[j] = sorted[j + 1];
-                sorted[j + 1] = tmp;
-            }
-        }
-    }
-
-    int index = (int)(percentile / 100.0 * (count - 1) + 0.5);
-    return sorted[index];
+    *low = sorted[percentile_index(count, LOW_PERCENTILE)];
+    *high = sorted[percentile_index(count, HIGH_PERCENTILE)];
 }
 
 static double min3(double a, double b, double c)
@@ -62,15 +66,16 @@ int compute_plan(const Slot *slots, int count, const ComputeParams *params, Plan
     const double max_step = params->battery_max_kw * SLOT_HOURS;
     const double consumption = params->base_load_kw * SLOT_HOURS;
 
+    double low = 0.0, high = 0.0;
+    price_thresholds(slots, count, &low, &high);
+    /* Är alla priser lika finns inget att vinna på att flytta energi. */
+    const int has_spread = high - low > EPSILON;
+
     for (int i = 0; i < count; i++)
     {
         const Slot *in = &slots[i];
         PlanSlot *out = &plan->slots[i];
 
-        double low = price_percentile(slots, count, LOW_PERCENTILE);
-        double high = price_percentile(slots, count, HIGH_PERCENTILE);
-        /* Är alla priser lika finns inget att vinna på att flytta energi. */
-        int has_spread = high - low > EPSILON;
         int price_is_low = has_spread && in->price <= low;
         int price_is_high = has_spread && in->price >= high;
 

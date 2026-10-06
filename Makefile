@@ -13,7 +13,7 @@
 
 CC  = gcc
 CXX = g++
-OPT ?= -O0
+OPT ?= -O2
 
 CFLAGS   = -std=c11 -D_GNU_SOURCE -Wall -Wextra -pthread -g $(OPT) -Isrc -MMD -MP
 CXXFLAGS = -std=c++17 -Wall -Wextra -pthread -g $(OPT) -Isrc -MMD -MP
