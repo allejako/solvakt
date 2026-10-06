@@ -1,0 +1,6 @@
+bin/
+build/
+logs/
+gmon.out
+*.o
+*.d
