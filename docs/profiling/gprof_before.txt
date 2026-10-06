@@ -1,0 +1,59 @@
+gcc -std=c11 -D_GNU_SOURCE -Wall -Wextra -g -O0 -pg -Isrc \
+    -o bin/bench_compute_prof bench/bench_compute.c src/server/compute.c -lm
+./bin/bench_compute_prof 200
+iterationer : 200
+total tid   : 3786.43 ms
+per plan    : 18932.17 us
+planer/s    : 53
+kontrollsum : 1815.773881
+gprof -b bin/bench_compute_prof gmon.out
+Flat profile:
+
+Each sample counts as 0.01 seconds.
+  %   cumulative   self              self     total           
+ time   seconds   seconds    calls  ms/call  ms/call  name    
+100.00      3.78     3.78    76800     0.05     0.05  price_percentile
+  0.00      3.78     0.00    38400     0.00     0.00  compute_production_kwh
+  0.00      3.78     0.00     8000     0.00     0.00  min3
+  0.00      3.78     0.00      200     0.00    18.90  compute_plan
+  0.00      3.78     0.00        1     0.00     0.00  elapsed_ms
+  0.00      3.78     0.00        1     0.00     0.00  fill_forecast
+
+			Call graph
+
+
+granularity: each sample hit covers 4 byte(s) for 0.26% of 3.78 seconds
+
+index % time    self  children    called     name
+                3.78    0.00   76800/76800       compute_plan [2]
+[1]    100.0    3.78    0.00   76800         price_percentile [1]
+-----------------------------------------------
+                0.00    3.78     200/200         main [3]
+[2]    100.0    0.00    3.78     200         compute_plan [2]
+                3.78    0.00   76800/76800       price_percentile [1]
+                0.00    0.00   38400/38400       compute_production_kwh [4]
+                0.00    0.00    8000/8000        min3 [5]
+-----------------------------------------------
+                                                 <spontaneous>
+[3]    100.0    0.00    3.78                 main [3]
+                0.00    3.78     200/200         compute_plan [2]
+                0.00    0.00       1/1           fill_forecast [7]
+                0.00    0.00       1/1           elapsed_ms [6]
+-----------------------------------------------
+                0.00    0.00   38400/38400       compute_plan [2]
+[4]      0.0    0.00    0.00   38400         compute_production_kwh [4]
+-----------------------------------------------
+                0.00    0.00    8000/8000        compute_plan [2]
+[5]      0.0    0.00    0.00    8000         min3 [5]
+-----------------------------------------------
+                0.00    0.00       1/1           main [3]
+[6]      0.0    0.00    0.00       1         elapsed_ms [6]
+-----------------------------------------------
+                0.00    0.00       1/1           main [3]
+[7]      0.0    0.00    0.00       1         fill_forecast [7]
+-----------------------------------------------
+
+Index by function name
+
+   [2] compute_plan            [6] elapsed_ms (bench_compute.c) [5] min3 (compute.c)
+   [4] compute_production_kwh  [7] fill_forecast (bench_compute.c) [1] price_percentile (compute.c)

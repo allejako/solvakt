@@ -1,0 +1,8 @@
+# Naiv version (commit 1a0a461), gcc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0
+# Intel(R) Core(TM) i9-9900K CPU @ 3.60GHz, Linux 6.6.87.2-microsoft-standard-WSL2
+-O0 körning 1: per plan    : 15932.98 us kontrollsum : 1815.773881 
+-O0 körning 2: per plan    : 15983.04 us kontrollsum : 1815.773881 
+-O0 körning 3: per plan    : 16016.02 us kontrollsum : 1815.773881 
+-O2 körning 1: per plan    : 15468.79 us kontrollsum : 1815.773881 
+-O2 körning 2: per plan    : 15404.41 us kontrollsum : 1815.773881 
+-O2 körning 3: per plan    : 15431.87 us kontrollsum : 1815.773881 
