@@ -716,9 +716,10 @@ int server_run(Server *s, const volatile sig_atomic_t *stop)
         if (pthread_cond_timedwait(&s->clients_done, &s->clients_mutex, &deadline) == ETIMEDOUT)
             break;
     }
-    if (s->clients > 0)
-        LOG_WARN("Server: %d klienttrådar avslutades inte i tid", s->clients);
+    int remaining = s->clients;
     pthread_mutex_unlock(&s->clients_mutex);
+    if (remaining > 0)
+        LOG_WARN("Server: %d klienttrådar avslutades inte i tid", remaining);
 
     return started == 3 ? 0 : -1;
 }
