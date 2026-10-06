@@ -1,0 +1,11 @@
+# Optimerad version (commit cdc841b), gcc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0
+# Intel(R) Core(TM) i9-9900K CPU @ 3.60GHz, Linux 6.6.87.2-microsoft-standard-WSL2
+# 200 iterationer ger samma kontrollsumma som före; 200000 ger stabilare tid
+-O0 200 iterationer: per plan    : 7.79 us kontrollsum : 1815.773881 
+-O0 körning 1 (200000 iterationer): per plan    : 7.51 us kontrollsum : 1861219.602681 
+-O0 körning 2 (200000 iterationer): per plan    : 7.38 us kontrollsum : 1861219.602681 
+-O0 körning 3 (200000 iterationer): per plan    : 7.39 us kontrollsum : 1861219.602681 
+-O2 200 iterationer: per plan    : 4.08 us kontrollsum : 1815.773881 
+-O2 körning 1 (200000 iterationer): per plan    : 4.00 us kontrollsum : 1861219.602681 
+-O2 körning 2 (200000 iterationer): per plan    : 3.97 us kontrollsum : 1861219.602681 
+-O2 körning 3 (200000 iterationer): per plan    : 4.07 us kontrollsum : 1861219.602681 
