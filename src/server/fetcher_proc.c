@@ -226,6 +226,29 @@ int fetcher_request(Fetcher *f, const char *url, char **body, size_t *len,
     return FETCH_OK;
 }
 
+int fetcher_reap_if_dead(Fetcher *f)
+{
+    if (f->pid <= 0)
+        return 0;
+
+    int status = 0;
+    if (waitpid(f->pid, &status, WNOHANG) == 0)
+        return 0; /* lever fortfarande */
+
+    if (WIFSIGNALED(status))
+        LOG_WARN("Fetcher: PID %d dog oväntat av signal %d", (int)f->pid, WTERMSIG(status));
+    else
+        LOG_WARN("Fetcher: PID %d avslutades oväntat med kod %d", (int)f->pid,
+                 WIFEXITED(status) ? WEXITSTATUS(status) : -1);
+
+    close(f->to_fd);
+    close(f->from_fd);
+    f->to_fd = -1;
+    f->from_fd = -1;
+    f->pid = -1;
+    return 1;
+}
+
 void fetcher_stop(Fetcher *f)
 {
     if (f->to_fd >= 0)

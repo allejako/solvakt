@@ -28,6 +28,11 @@ int fetcher_start(Fetcher *f, const char *exe_path, int http_timeout_s);
 int fetcher_request(Fetcher *f, const char *url, char **body, size_t *len,
                     const atomic_bool *running);
 
+/* Kontrollerar utan att blockera om barnprocessen har avslutats. I så fall
+ * städas den upp med waitpid (ingen zombie blir kvar), pipes stängs och 1
+ * returneras. Returnerar 0 om fetchern lever eller redan är stoppad. */
+int fetcher_reap_if_dead(Fetcher *f);
+
 /* Stänger pipes, väntar in barnprocessen med waitpid och dödar den om den
  * inte avslutas själv. Säker att anropa flera gånger. */
 void fetcher_stop(Fetcher *f);
